@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PCM-PRO · RK Moyenne</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0E1420; --panel:#151D2D; --panel2:#1B2538; --ink:#E7ECF5; --muted:#8C99B2; --line:#26324A;
+  --accent:#F2A93B; --good:#3FC57F; --bad:#EF5F5F; --blue:#5AA2F0;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#EEF1F6; --panel:#FFFFFF; --panel2:#F4F6FA; --ink:#141B2B; --muted:#5B6782; --line:#D6DCE7;
+  --accent:#C77A0E; --good:#1E9A5A; --bad:#C93B3B; --blue:#2368C9;}}
+:root[data-theme="light"]{--bg:#EEF1F6; --panel:#FFFFFF; --panel2:#F4F6FA; --ink:#141B2B; --muted:#5B6782; --line:#D6DCE7;
+  --accent:#C77A0E; --good:#1E9A5A; --bad:#C93B3B; --blue:#2368C9;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 Barlow,Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:12px 12px 60px}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:700;margin:0;letter-spacing:.02em}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.hidden{display:none!important}
+
+header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+header h1{font-size:26px}
+header h1 span{color:var(--accent)}
+header small{color:var(--muted)}
+
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tab{flex:1;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:10px 4px;font-weight:600}
+.tab.on{background:var(--accent);border-color:var(--accent);color:#14100A}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+.card h2{font-size:18px;margin-bottom:8px;color:var(--accent)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+label.f{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+label.f input,label.f select{display:block;width:100%;margin-top:3px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px}
+.hint{font-size:13px;color:var(--muted);margin:6px 0 0}
+
+.btn{border:0;border-radius:8px;padding:11px 14px;font-weight:700;background:var(--accent);color:#14100A}
+.btn.sec{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:6px 10px;font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row .btn{flex:1}
+
+/* Partants */
+.slot{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:6px;overflow:hidden}
+.slot-h{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:10px 12px;text-align:left}
+.num{flex:none;width:30px;height:30px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;font:700 16px/1 "Barlow Condensed",sans-serif}
+.slot.ok .num{background:var(--accent);color:#14100A;border-color:var(--accent)}
+.slot-name{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-name em{font-style:normal;color:var(--muted);font-weight:400}
+.slot-meta{flex:none;font-size:12px;color:var(--muted)}
+.slot-b{padding:0 12px 12px}
+.slot-b textarea{width:100%;min-height:130px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px;font:13px/1.35 "JetBrains Mono",monospace;resize:vertical}
+
+/* Résultats */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;background:var(--panel);font-size:14px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font:600 12px/1 Barlow,sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:var(--panel2)}
+td.r,th.r{text-align:right}
+tr.click{cursor:pointer}
+tr.click:active{background:var(--panel2)}
+.rk{font:700 15px/1 "JetBrains Mono",monospace}
+.first .rk{color:var(--good)}
+.ecart{color:var(--muted)}
+.rank{font:700 17px/1 "Barlow Condensed",sans-serif;color:var(--accent)}
+.detail td{white-space:normal}
+.x{color:var(--bad);text-decoration:line-through}
+.badge{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:4px;padding:1px 4px;color:var(--muted);margin-left:4px}
+.empty{color:var(--muted);text-align:center;padding:24px}
+</style>
+</head>
+<body>
+<main>
+<header><h1>PCM-PRO <span>RK MOYENNE</span></h1><small>18 partants</small></header>
+
+<div class="tabs">
+  <button class="tab on" data-tab="saisie">Partants</button>
+  <button class="tab" data-tab="res">Classement</button>
+  <button class="tab" data-tab="reg">Réglages</button>
+</div>
+
+<!-- SAISIE -->
+<section id="saisie">
+  <div class="card">
+    <h2>Course du jour</h2>
+    <div class="grid3">
+      <label class="f">Distance (m)<input id="dDist" type="number" inputmode="numeric" placeholder="auto"></label>
+      <label class="f">Discipline<select id="dDisc"><option>Attelé</option><option>Monté</option></select></label>
+      <label class="f">Départ<select id="dDep"><option>Volté</option><option>Autostart</option></select></label>
+    </div>
+    <p class="hint">Distance et discipline sont lues automatiquement dans la « Prochaine course » de la première fiche. Le départ n'y figure pas : choisis-le.</p>
+  </div>
+  <div id="slots"></div>
+  <div class="row" style="margin-top:10px">
+    <button class="btn" id="calcBtn">Calculer le classement</button>
+    <button class="btn sec" id="clearAll">Tout effacer</button>
+  </div>
+</section>
+
+<!-- RÉSULTATS -->
+<section id="res" class="hidden">
+  <div class="card" id="resInfo"></div>
+  <div id="resBody"></div>
+</section>
+
+<!-- RÉGLAGES -->
+<section id="reg" class="hidden">
+  <div class="card">
+    <h2>Corrections</h2>
+    <div class="grid3">
+      <label class="f">Distance ("/25 m)<input id="kDist" type="number" step="0.01" inputmode="decimal"></label>
+      <label class="f">Autostart (")<input id="kAuto" type="number" step="0.1" inputmode="decimal"></label>
+      <label class="f">Monté (")<input id="kMonte" type="number" step="0.1" inputmode="decimal"></label>
+    </div>
+    <p class="hint">Distance : 0,05"/25 m = 1"/500 m (malus endurance). 0,1"/25 m = valeur de l'Équilibreur RK. Une course plus courte que celle du jour rend la RK plus lente, une plus longue la rend plus rapide.<br>
+    Autostart : ajouté à une RK courue en autostart quand la course du jour est en volté (retiré dans le cas inverse).<br>
+    Monté : retiré à une RK courue au monté quand la course du jour est attelée (ajouté dans le cas inverse).</p>
+  </div>
+  <div class="card">
+    <h2>Sélection des courses</h2>
+    <div class="grid3">
+      <label class="f">N dernières (0 = toutes)<input id="lastN" type="number" inputmode="numeric"></label>
+      <label class="f">Écart aberrant (")<input id="kOut" type="number" step="0.1" inputmode="decimal"></label>
+      <label class="f">Moyenne<select id="avgMode"><option value="simple">Simple</option><option value="pond">Pondérée distance</option></select></label>
+    </div>
+    <label class="f" style="margin-top:8px">Même discipline uniquement<select id="sameDisc"><option value="1">Oui</option><option value="0">Non</option></select></label>
+    <p class="hint">N dernières : les N courses les plus récentes où le cheval a une RK (les disqualifiés et non placés sans temps ne comptent pas).<br>
+    Écart aberrant : une course est écartée si sa RK ramenée s'éloigne de plus de cette valeur de la médiane du cheval (0 = désactivé).</p>
+  </div>
+  <button class="btn" id="saveReg" style="width:100%">Enregistrer et recalculer</button>
+</section>
+
+</main>
+<script>
+/* =================== CONFIG & SESSION =================== */
+const NB=18, KEY="pcm_rk_moyenne_v1";
+const DEF={kDist:0.05,kAuto:0.7,kMonte:0.5,lastN:0,kOut:2,avgMode:"simple",sameDisc:"1"};
+let ST={texts:Array(NB).fill(""), dist:"", disc:"Attelé", dep:"Volté", reg:{...DEF}};
+try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s){ ST={...ST,...s, reg:{...DEF,...(s.reg||{})}}; while(ST.texts.length<NB) ST.texts.push(""); } }catch(e){}
+function persist(){ try{ localStorage.setItem(KEY,JSON.stringify(ST)); }catch(e){} }
+const $=id=>document.getElementById(id);
+
+/* =================== OUTILS =================== */
+const norm=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
+function rkToSec(s){ const m=s.match(/(\d)'(\d{2})"(\d)/); return m ? (+m[1])*60 + (+m[2]) + (+m[3])/10 : null; }
+function secToRk(x){ if(x==null||!isFinite(x)) return "–"; let t=Math.round(x*10)/10; const m=Math.floor(t/60); const s=t-m*60; const ss=Math.floor(s); const d=Math.round((s-ss)*10); return `${m}'${String(ss).padStart(2,"0")}"${d}`; }
+const fmt1=x=>(x>=0?"+":"−")+Math.abs(x).toFixed(1).replace(".",",")+'"';
+
+/* =================== PARSEUR FICHE ZONE-TURF =================== */
+function parseFiche(txt){
+  const lines=txt.replace(/\r/g,"").split("\n").map(l=>l.trim()).filter(l=>l);
+  if(!lines.length) return null;
+  const head=lines[0].match(/^(.+?)\s+[HFM]\d{1,2}\b/);
+  const name=(head?head[1]:lines[0]).trim();
+  const out={name, key:norm(name), races:[], next:null, ferrureJour:""};
+
+  // Prochaine course
+  const iN=lines.findIndex(l=>/^Prochaine course/i.test(l));
+  if(iN>=0 && lines[iN+1]){
+    const l=lines[iN+1]; const d=l.match(/(\d{4})\s?m\b/);
+    out.next={dist:d?+d[1]:null, disc:/mont[ée]/i.test(l)?"Monté":/attel/i.test(l)?"Attelé":null, auto:/autostart/i.test(l)};
+    const f=(lines[iN+2]||"").match(/^(D4|DA|DP|PA|P4|DP\/PA|DA\/PA)/); if(f) out.ferrureJour=f[1];
+  }
+
+  // Performances
+  let cur=null;
+  for(const l of lines){
+    const h=l.match(/^(\d{2})\/(\d{2})\/(\d{4})\s*-\s*([^-]+?)\s*-\s*(\d{3,4})\s?m\b/);
+    if(h){
+      cur={date:`${h[3]}-${h[2]}-${h[1]}`, dateTxt:`${h[1]}/${h[2]}/${h[3].slice(2)}`, hippo:h[4].trim(), dist:+h[5],
+        disc:/\bMont[ée]\b/i.test(l)?"Monté":"Attelé", auto:/Autostart/i.test(l)};
+      continue;
+    }
+    if(!cur || cur.done || /^Rg\b/i.test(l)) continue;
+    // Ligne du cheval
+    const cols=l.includes("\t") ? l.split("\t").map(c=>c.trim()) : l.split(/\s{2,}/);
+    const nameCol = cols.length>1 ? cols[1] : l;
+    if(!norm(nameCol).startsWith(out.key)) continue;
+    cur.done=true;
+    const ferr=(nameCol.slice(name.length).match(/(DP\/PA|DA\/PA|D4|DA|DP|PA|P4)/)||[""])[0];
+    const rkM=l.match(/\d'\d{2}"\d/g); const rk=rkM?rkToSec(rkM[rkM.length-1]):null;
+    let dist=cur.dist;
+    if(!cur.auto){ const dm=l.match(/(\d)\s?(\d{3})\s?m\b/); if(dm) dist=+(dm[1]+dm[2]); }
+    out.races.push({date:cur.date, dateTxt:cur.dateTxt, hippo:cur.hippo, dist, disc:cur.disc, auto:cur.auto, rang:cols[0], ferr, rk});
+  }
+  out.races.sort((a,b)=>b.date.localeCompare(a.date));
+  return out;
+}
+
+/* =================== CALCUL =================== */
+function median(a){ const s=[...a].sort((x,y)=>x-y), n=s.length; return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2; }
+function analyse(h, D0, disc0, auto0, R){
+  let list=h.races.filter(r=>r.rk!=null);
+  if(R.sameDisc==="1") list=list.filter(r=>r.disc===disc0);
+  if(+R.lastN>0) list=list.slice(0,+R.lastN);
+  list=list.map(r=>{
+    let c=r.rk, notes=[];
+    const dd=(D0-r.dist)/25*R.kDist; if(dd){ c+=dd; notes.push("dist "+fmt1(dd)); }
+    if(r.auto && !auto0){ c+=+R.kAuto; notes.push("auto "+fmt1(+R.kAuto)); }
+    if(!r.auto && auto0){ c-=+R.kAuto; notes.push("volté "+fmt1(-R.kAuto)); }
+    if(r.disc==="Monté" && disc0==="Attelé"){ c-=+R.kMonte; notes.push("monté "+fmt1(-R.kMonte)); }
+    if(r.disc==="Attelé" && disc0==="Monté"){ c+=+R.kMonte; notes.push("attelé "+fmt1(+R.kMonte)); }
+    return {...r, corr:c, notes, out:false};
+  });
+  if(+R.kOut>0 && list.length>=3){ const m=median(list.map(r=>r.corr)); list.forEach(r=>{ r.out=Math.abs(r.corr-m)>+R.kOut; }); }
+  const used=list.filter(r=>!r.out);
+  let avg=null;
+  if(used.length){
+    avg = R.avgMode==="pond"
+      ? used.reduce((s,r)=>s+r.corr*r.dist,0)/used.reduce((s,r)=>s+r.dist,0)
+      : used.reduce((s,r)=>s+r.corr,0)/used.length;
+  }
+  const best=used.length?Math.min(...used.map(r=>r.corr)):null;
+  return {avg,best,list,nUsed:used.length};
+}
+
+/* =================== INTERFACE PARTANTS =================== */
+function renderSlots(){
+  $("slots").innerHTML=Array.from({length:NB},(_,i)=>`
+    <div class="slot" id="slot${i}">
+      <button class="slot-h" data-i="${i}"><span class="num">${i+1}</span><span class="slot-name" id="sn${i}"></span><span class="slot-meta" id="sm${i}"></span></button>
+      <div class="slot-b hidden" id="sb${i}">
+        <textarea id="ta${i}" placeholder="Colle ici la fiche Zone-Turf du n°${i+1}"></textarea>
+        <div class="row" style="margin-top:6px">
+          <button class="btn sec small" data-paste="${i}">Coller</button>
+          <button class="btn sec small" data-clear="${i}">Effacer</button>
+          <button class="btn small" data-close="${i}">OK</button>
+        </div>
+      </div>
+    </div>`).join("");
+  for(let i=0;i<NB;i++){
+    $("ta"+i).value=ST.texts[i];
+    $("ta"+i).oninput=()=>{ ST.texts[i]=$("ta"+i).value; persist(); updateSlot(i); autoCourse(); };
+    updateSlot(i);
+  }
+  document.querySelectorAll(".slot-h").forEach(b=>b.onclick=()=>$("sb"+b.dataset.i).classList.toggle("hidden"));
+  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>$("sb"+b.dataset.close).classList.add("hidden"));
+  document.querySelectorAll("[data-clear]").forEach(b=>b.onclick=()=>{ const i=+b.dataset.clear; ST.texts[i]=""; $("ta"+i).value=""; persist(); updateSlot(i); });
+  document.querySelectorAll("[data-paste]").forEach(b=>b.onclick=async()=>{
+    const i=+b.dataset.paste;
+    try{ const t=await navigator.clipboard.readText(); if(t){ ST.texts[i]=t; $("ta"+i).value=t; persist(); updateSlot(i); autoCourse(); } }
+    catch(e){ $("ta"+i).focus(); alert("Le navigateur bloque le collage automatique : appuie longuement dans la case puis « Coller »."); }
+  });
+}
+function updateSlot(i){
+  const f=ST.texts[i].trim()?parseFiche(ST.texts[i]):null;
+  const ok=f && f.races.length;
+  $("slot"+i).classList.toggle("ok",!!ok);
+  $("sn"+i).innerHTML = f ? `${f.name}${f.ferrureJour?` <em>${f.ferrureJour}</em>`:""}` : `<em>Vide</em>`;
+  $("sm"+i).textContent = f ? `${f.races.filter(r=>r.rk!=null).length} RK / ${f.races.length} courses` : "";
+}
+function autoCourse(){
+  if(ST.dist) return;
+  for(const t of ST.texts){ if(!t.trim()) continue; const f=parseFiche(t);
+    if(f&&f.next&&f.next.dist){ ST.dist=String(f.next.dist); if(f.next.disc) ST.disc=f.next.disc; if(f.next.auto) ST.dep="Autostart"; persist(); fillCourse(); return; } }
+}
+function fillCourse(){ $("dDist").value=ST.dist; $("dDisc").value=ST.disc; $("dDep").value=ST.dep; }
+$("dDist").oninput=()=>{ ST.dist=$("dDist").value; persist(); };
+$("dDisc").onchange=()=>{ ST.disc=$("dDisc").value; persist(); };
+$("dDep").onchange=()=>{ ST.dep=$("dDep").value; persist(); };
+$("clearAll").onclick=()=>{ if(!confirm("Effacer les 18 fiches et la course du jour ?")) return; ST.texts=Array(NB).fill(""); ST.dist=""; persist(); renderSlots(); fillCourse(); };
+
+/* =================== CLASSEMENT =================== */
+let open=null;
+function calc(){
+  const D0=+ST.dist;
+  if(!D0){ alert("Indique la distance de la course du jour."); return; }
+  const R=ST.reg, auto0=ST.dep==="Autostart";
+  const rows=[];
+  ST.texts.forEach((t,i)=>{ if(!t.trim()) return; const f=parseFiche(t); if(!f) return; rows.push({n:i+1, f, a:analyse(f,D0,ST.disc,auto0,R)}); });
+  const ranked=rows.filter(r=>r.a.avg!=null).sort((x,y)=>x.a.avg-y.a.avg), none=rows.filter(r=>r.a.avg==null);
+  const top=ranked.length?ranked[0].a.avg:0;
+  $("resInfo").innerHTML=`<h2>${D0} m · ${ST.disc} · ${ST.dep}</h2><p class="hint" style="margin:0">Distance ${String(R.kDist).replace(".",",")}"/25 m · Autostart ${String(R.kAuto).replace(".",",")}" · ${+R.lastN>0?R.lastN+" dernières courses":"toutes les courses"} · moyenne ${R.avgMode==="pond"?"pondérée":"simple"}. Touche un cheval pour le détail.</p>`;
+  if(!rows.length){ $("resBody").innerHTML=`<div class="empty">Aucune fiche saisie.</div>`; return; }
+  let html=`<div class="tablewrap"><table><tr><th>Rg</th><th>N°</th><th>Cheval</th><th class="r">RK moy.</th><th class="r">Écart</th><th class="r">Meilleure</th><th class="r">Courses</th></tr>`;
+  ranked.forEach((r,k)=>{
+    html+=`<tr class="click ${k===0?"first":""}" data-n="${r.n}"><td class="rank">${k+1}</td><td>${r.n}</td><td>${r.f.name}${r.f.ferrureJour?`<span class="badge">${r.f.ferrureJour}</span>`:""}</td>
+      <td class="r rk">${secToRk(r.a.avg)}</td><td class="r ecart mono">${k?fmt1(r.a.avg-top):"–"}</td><td class="r mono">${secToRk(r.a.best)}</td><td class="r">${r.a.nUsed}</td></tr>`;
+    if(open===r.n) html+=detail(r);
+  });
+  none.forEach(r=>{ html+=`<tr class="click" data-n="${r.n}"><td>–</td><td>${r.n}</td><td>${r.f.name}</td><td class="r" colspan="4" style="color:var(--muted)">aucune RK exploitable</td></tr>`; if(open===r.n) html+=detail(r); });
+  html+=`</table></div>`;
+  $("resBody").innerHTML=html;
+  document.querySelectorAll("tr.click").forEach(tr=>tr.onclick=()=>{ const n=+tr.dataset.n; open = open===n?null:n; calc(); });
+}
+function detail(r){
+  if(!r.a.list.length) return `<tr class="detail"><td colspan="7" class="hint">Aucune course avec RK${ST.reg.sameDisc==="1"?" dans cette discipline":""}.</td></tr>`;
+  const items=r.a.list.map(c=>`<div style="padding:4px 0;border-top:1px dashed var(--line)" class="${c.out?"x":""}">
+    <b>${c.dateTxt}</b> ${c.hippo} · ${c.dist} m ${c.auto?"auto":"volté"}${c.disc==="Monté"?" · monté":""} · rg ${c.rang}${c.ferr?" · "+c.ferr:""}<br>
+    <span class="mono">${secToRk(c.rk)} → ${secToRk(c.corr)}</span> <span style="color:var(--muted)">${c.notes.join(", ")}${c.out?" · écartée (aberrante)":""}</span></div>`).join("");
+  return `<tr class="detail"><td colspan="7" style="background:var(--panel2)">${items}</td></tr>`;
+}
+$("calcBtn").onclick=()=>{ calc(); showTab("res"); };
+
+/* =================== RÉGLAGES =================== */
+function fillReg(){ for(const k in DEF) $(k).value=ST.reg[k]; }
+$("saveReg").onclick=()=>{
+  for(const k in DEF){ const v=$(k).value; ST.reg[k] = (k==="avgMode"||k==="sameDisc") ? v : (v===""?DEF[k]:+String(v).replace(",",".")); }
+  persist(); calc(); showTab("res");
+};
+
+/* =================== ONGLETS =================== */
+function showTab(t){
+  ["saisie","res","reg"].forEach(s=>$(s).classList.toggle("hidden",s!==t));
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+  if(t==="res") calc();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+renderSlots(); fillCourse(); fillReg(); autoCourse();
+</script>
+</body>
+</html>
